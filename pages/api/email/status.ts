@@ -17,17 +17,23 @@ interface StatusResponse {
   message?: string;
 }
 
-// Import the shared batch results directly
-async function getBatchResultsFromSend(batchId: string) {
-  try {
-    // Dynamic import to avoid circular dependency issues
-    const sendModule = await import('./send');
-    return sendModule.getBatchResults(batchId);
-  } catch (error) {
-    console.error('Error importing send module:', error);
-    return null;
-  }
+// Use the same global batch storage as send.ts
+declare global {
+  var batchResults: Map<string, {
+    results: Array<{
+      email: string;
+      status: 'success' | 'failed';
+      messageId?: string;
+      error?: string;
+    }>;
+    status: 'processing' | 'completed' | 'failed';
+    totalSent: number;
+    totalFailed: number;
+    createdAt: Date;
+  }> | undefined;
 }
+
+const batchResults = globalThis.batchResults ?? new Map();
 
 async function handler(
   req: AuthenticatedRequest,
@@ -47,7 +53,10 @@ async function handler(
       });
     }
 
-    const batch = await getBatchResultsFromSend(batchId);
+    console.log(`Status endpoint: Looking for batch ${batchId}`);
+    console.log(`Status endpoint: Total batches stored: ${batchResults.size}`);
+    const batch = batchResults.get(batchId);
+    console.log(`Status endpoint: Found batch:`, batch ? 'YES' : 'NO');
 
     if (!batch) {
       return res.status(404).json({

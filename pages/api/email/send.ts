@@ -42,14 +42,29 @@ interface SendResponse {
   batchId?: string;
 }
 
-// Store batch results in memory (in production, use Redis or database)
-const batchResults = new Map<string, {
+// Use global to ensure the Map persists across API calls in the same process
+declare global {
+  var batchResults: Map<string, {
+    results: EmailResult[];
+    status: 'processing' | 'completed' | 'failed';
+    totalSent: number;
+    totalFailed: number;
+    createdAt: Date;
+  }> | undefined;
+}
+
+// Initialize global batch storage
+const batchResults = globalThis.batchResults ?? new Map<string, {
   results: EmailResult[];
   status: 'processing' | 'completed' | 'failed';
   totalSent: number;
   totalFailed: number;
   createdAt: Date;
 }>();
+
+if (!globalThis.batchResults) {
+  globalThis.batchResults = batchResults;
+}
 
 const sendEmailBatch = async (
   emails: Array<{
@@ -333,25 +348,7 @@ async function processBatchAsync(
 
 // Export function to get batch results (used by status endpoint)
 export function getBatchResults(batchId: string) {
-  const batch = batchResults.get(batchId);
-  if (!batch) return null;
-
-  return {
-    ...batch,
-    results: batch.results,
-  };
-}
-
-// Cleanup old batches (call this periodically)
-export function cleanupOldBatches() {
-  const now = new Date();
-  const cutoff = 24 * 60 * 60 * 1000; // 24 hours
-
-  batchResults.forEach((batch, batchId) => {
-    if (now.getTime() - batch.createdAt.getTime() > cutoff) {
-      batchResults.delete(batchId);
-    }
-  });
+  return batchResults.get(batchId) || null;
 }
 
 export default withAuth(handler);
