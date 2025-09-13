@@ -1,0 +1,19 @@
+{
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "functions": {
+    "pages/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "ADMIN_USERNAME": "@admin_username",
+    "ADMIN_PASSWORD": "@admin_password", 
+    "RESEND_API_KEY": "@resend_api_key",
+    "NEXTAUTH_SECRET": "@nextauth_secret"
+  }
+}
