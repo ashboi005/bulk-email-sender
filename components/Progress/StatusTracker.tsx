@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, CheckCircle, XCircle, Clock, Download, RotateCcw, Users, Mail, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -31,7 +31,7 @@ export default function StatusTracker({ batchId, onReset }: StatusTrackerProps) 
   const [showDetails, setShowDetails] = useState(false);
   const [filterStatus, setFilterStatus] = useState<'all' | 'success' | 'failed'>('all');
 
-  const fetchStatus = async (showRefreshing = false) => {
+  const fetchStatus = useCallback(async (showRefreshing = false) => {
     if (showRefreshing) setIsRefreshing(true);
     
     try {
@@ -55,7 +55,7 @@ export default function StatusTracker({ batchId, onReset }: StatusTrackerProps) 
     } finally {
       setIsRefreshing(false);
     }
-  };
+  }, [batchId]);
 
   // Auto-refresh while processing
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function StatusTracker({ batchId, onReset }: StatusTrackerProps) 
     }, 2000); // Refresh every 2 seconds while processing
 
     return () => clearInterval(interval);
-  }, [batchId, batchStatus?.status]);
+  }, [batchId, batchStatus?.status, fetchStatus]);
 
   const exportResults = () => {
     if (!batchStatus?.results) return;

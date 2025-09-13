@@ -34,7 +34,7 @@ export default function MessageEditor({ template, onUpdate, availableVariables }
       
       onUpdate({ ...template, textContent: plainText });
     }
-  }, [template.htmlContent]);
+  }, [template.htmlContent, template, onUpdate]);
 
   const handleFieldChange = (field: keyof EmailTemplate, value: string) => {
     onUpdate({ ...template, [field]: value });
@@ -142,7 +142,7 @@ export default function MessageEditor({ template, onUpdate, availableVariables }
                 placeholder="Your Company Name"
               />
               <p className="text-sm text-gray-500 mt-1">
-                This will appear as the sender name (e.g., "Your Company Name &lt;noreply@yourdomain.com&gt;")
+                This will appear as the sender name (e.g., &quot;Your Company Name &lt;noreply@yourdomain.com&gt;&quot;)
               </p>
             </div>
 

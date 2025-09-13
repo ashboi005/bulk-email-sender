@@ -19,7 +19,7 @@ export default function DropZone({ onFileUpload }: DropZoneProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const processFile = async (file: File) => {
+  const processFile = useCallback(async (file: File) => {
     setIsUploading(true);
     setUploadStatus('idle');
 
@@ -58,7 +58,7 @@ export default function DropZone({ onFileUpload }: DropZoneProps) {
     } finally {
       setIsUploading(false);
     }
-  };
+  }, [onFileUpload]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
@@ -87,7 +87,7 @@ export default function DropZone({ onFileUpload }: DropZoneProps) {
       
       processFile(file);
     }
-  }, []);
+  }, [processFile]);
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
     onDrop,
@@ -177,7 +177,7 @@ export default function DropZone({ onFileUpload }: DropZoneProps) {
           </li>
           <li className="flex items-center space-x-2">
             <File className="h-4 w-4" />
-            <span>Must contain an "email" column</span>
+            <span>Must contain an &quot;email&quot; column</span>
           </li>
           <li className="flex items-center space-x-2">
             <File className="h-4 w-4" />
